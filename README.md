@@ -26,9 +26,25 @@ Why each overlap is counted exactly once: when two assignments overlap, whicheve
 
 Complexity: sorting the events is O(n log n) for n assignments. The comparison work depends on how many assignments on the same project are active at the same time, since every one of them forms a pair with the ending assignment. For realistic data this is small, so the running time is close to O(n log n). In the worst case, when many employees are on one project at once, the output itself contains a pair for each combination of them, so the work cannot be lower than that.
 
-## Assumptions
+## Input file (CSV)
 
-- The data in the input file is correct and is not validated. In particular, every assignment is assumed to start on or before its end date; results for assignments that start after they end are undefined.
+Assignments are read from a CSV file with four columns, in this order: `EmpID, ProjectID, DateFrom, DateTo` (see `AssignmentCsvParser`).
+
+- **Assumption:** the file has no header row. Every non-blank line is treated as an assignment.
+- Blank lines are ignored. Fields are trimmed. Values are not quoted, so a field cannot contain a comma.
+- `EmpID` and `ProjectID` must be positive integers.
+- Dates may use several formats: `2020-03-05`, `2020/03/05`, `2020.03.05`, `20200305`, `5/3/2020`, `5-3-2020`, `5.3.2020`, `5 Mar 2020`, and `5 March 2020`. **Dates with `/`, `-` or `.` separators and the year last are read day-first** (`05/03/2020` is 5 March), because month-first would be ambiguous with them.
+- `DateTo` may be empty or `NULL` (any case), meaning the assignment is still ongoing and ends today.
+- `DateFrom` must not be after `DateTo`.
+- All rows are validated. If any row is invalid, no pairs are calculated and every error is returned with its line number in the file (`PairReportService.Run` returns a `PairReport` with `Errors`).
+
+### Console app
+
+```
+dotnet run --project src/Employees.Console -- path/to/assignments.csv
+```
+
+Prints the longest pair(s) with the days worked together, or the list of invalid rows. Exit code: `0` success, `1` invalid rows in the file, `2` bad arguments or missing file. A sample file is in `src/Employees.Console/sample.csv`.
 
 ## Open requirements questions
 
