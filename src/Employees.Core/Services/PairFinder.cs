@@ -26,18 +26,22 @@ public static class PairFinder
     private static Dictionary<(int Employee1, int Employee2), long> FindPairOverlaps(IEnumerable<Assignment> assignments)
     {
         var pairOverlaps = new Dictionary<(int Employee1, int Employee2), long>();
-        var activeAssignments = new HashSet<Assignment>();
 
-        foreach (var point in ToSortedPoints(assignments))
+        foreach (var projectAssignments in assignments.GroupBy(a => a.ProjectId))
         {
-            if (point.Type == AssignmentPointType.Start)
-            {
-                activeAssignments.Add(point.Assignment);
-                continue;
-            }
+            var activeAssignments = new HashSet<Assignment>();
 
-            activeAssignments.Remove(point.Assignment);
-            AccumulateOverlaps(pairOverlaps, point.Assignment, activeAssignments);
+            foreach (var point in ToSortedPoints(projectAssignments))
+            {
+                if (point.Type == AssignmentPointType.Start)
+                {
+                    activeAssignments.Add(point.Assignment);
+                    continue;
+                }
+
+                activeAssignments.Remove(point.Assignment);
+                AccumulateOverlaps(pairOverlaps, point.Assignment, activeAssignments);
+            }
         }
 
         return pairOverlaps;
@@ -62,7 +66,7 @@ public static class PairFinder
     {
         foreach (var activeAssignment in activeAssignments)
         {
-            if (activeAssignment.ProjectId != ending.ProjectId || activeAssignment.EmployeeId == ending.EmployeeId)
+            if (activeAssignment.EmployeeId == ending.EmployeeId)
             {
                 continue;
             }
