@@ -1,8 +1,8 @@
 namespace Employees.Core;
 
-public static class PairFinder
+public class PairFinder : IPairFinder
 {
-    public static List<EmployeePair> FindLongestPairs(IEnumerable<Assignment> assignments)
+    public List<EmployeePair> FindLongestPairs(IEnumerable<Assignment> assignments)
     {
         var longestPairs = new List<EmployeePair>();
         long maxDays = 0;

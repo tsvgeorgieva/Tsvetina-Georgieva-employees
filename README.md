@@ -1,52 +1,65 @@
-# Tsvetina-Georgieva-employees
-Application that identifies the pair of employees who have worked together on common projects for the longest period of time
+# Employees
 
-## How the longest pair is determined
+Finds the pair of employees who have worked together on common projects for the longest total time. Input is a CSV file of project assignments; there is a web UI and a console app.
 
-- Two employees are a pair when they worked on the same project during overlapping dates. Only the overlapping days count.
-- Dates are inclusive and counted as **calendar days**: an overlap from Jan 1 to Jan 10 is 10 days, and assignments that touch on a single day share 1 day.
-- Days a pair spends together are added up across all common projects.
-- The pair with the most calendar days in total, across all common projects, is returned.
-- **If several pairs are tied for the longest total, all of them are returned**, not just one. The result is a list, and the order of pairs within it is not guaranteed.
-- Each pair is reported with the lower employee ID first.
-- If no two employees ever overlapped, an empty list is returned.
+## Run
+
+Requires the .NET 10 SDK.
+
+```
+dotnet run --project src/Employees.Web                      # web UI: choose a CSV file, see the result in a table
+dotnet run --project src/Employees.Console -- src/Employees.Console/sample.csv    # console, with the sample file
+dotnet test src/Employees.slnx                              # unit tests
+```
+
+The web page shows `Employee ID #1`, `Employee ID #2` and `Days worked together`. Invalid rows are reported with their line numbers instead.
+
+## Input
+
+CSV with no header, columns `EmpID, ProjectID, DateFrom, DateTo`:
+
+```
+143,12,2013-11-01,2014-01-05
+218,10,2012-05-16,NULL
+```
+
+- `DateTo` empty or `NULL` means the assignment is still ongoing and ends today.
+- Several date formats are accepted (`2020-03-05`, `20200305`, `5.3.2020`, `5 Mar 2020`, ...). Dates with `/`, `-` or `.` and the year last are read **day-first**, since month-first would be ambiguous.
+- The whole file is validated first. If any row is invalid, nothing is calculated and all errors are returned with line numbers.
+
+## Rules
+
+- Two employees overlap when they were on the **same project** at the same time. Only the overlapping days count.
+- Dates are inclusive calendar days: Jan 1 to Jan 10 is 10 days, and touching on a single day is 1 shared day.
+- A pair's days are summed over all their common projects. The pair with the highest total wins.
+- Ties: **all** tied pairs are returned. No overlap at all gives an empty result.
 
 ## Algorithm
 
-Comparing every assignment with every other one would take quadratic time and would mostly compare assignments that can never overlap. Instead, the code uses a **sweep line** over the assignment dates, done separately for each project (see `PairFinder`).
+A sweep line, per project (`PairFinder`):
 
-1. **Group by project.** Only assignments on the same project can overlap, so each project is processed on its own. Pairs are never compared across projects, but their days are added into one shared total per pair.
-2. **Turn assignments into events.** Every assignment produces a *start* event on its first day and an *end* event on its last day. The events of the project are sorted by date. On the same date, starts come before ends, which is what makes assignments that touch on a single day count as 1 shared day (dates are inclusive).
-3. **Sweep through the events,** keeping the set of assignments that are currently active:
-   - On a *start* event, the assignment is added to the active set.
-   - On an *end* event, the assignment is removed from the set, and then compared with every assignment that is still active (skipping the same employee). Each of those overlaps with it, and the shared days are `end of the ending assignment - later of the two start dates + 1`. The days are added to the total of that employee pair (stored with the lower ID first).
-4. **Pick the winners.** One pass over the pair totals keeps the maximum, and all pairs equal to it.
+1. Group assignments by project, since only those can overlap.
+2. Turn each assignment into a start event and an end event, sorted by date. On equal dates starts come first, which gives the inclusive "touching" behaviour.
+3. Walk the events keeping a set of active assignments. When an assignment ends, it overlaps with everything still active; add the shared days (`end - later start + 1`) to that employee pair's total.
+4. One pass over the totals keeps the maximum and all pairs equal to it.
 
-Why each overlap is counted exactly once: when two assignments overlap, whichever one ends first finds the other still active and records the overlap. When the other one ends later, the first is already gone from the active set, so nothing is counted twice.
+Each overlap is counted exactly once: whichever assignment ends first finds the other still active. Cost is O(n log n) for sorting plus the number of overlapping pairs, which any solution must at least output. This avoids comparing every assignment with every other one.
 
-Complexity: sorting the events is O(n log n) for n assignments. The comparison work depends on how many assignments on the same project are active at the same time, since every one of them forms a pair with the ending assignment. For realistic data this is small, so the running time is close to O(n log n). In the worst case, when many employees are on one project at once, the output itself contains a pair for each combination of them, so the work cannot be lower than that.
-
-## Input file (CSV)
-
-Assignments are read from a CSV file with four columns, in this order: `EmpID, ProjectID, DateFrom, DateTo` (see `AssignmentCsvParser`).
-
-- **Assumption:** the file has no header row. Every non-blank line is treated as an assignment.
-- Blank lines are ignored. Fields are trimmed. Values are not quoted, so a field cannot contain a comma.
-- `EmpID` and `ProjectID` must be positive integers.
-- Dates may use several formats: `2020-03-05`, `2020/03/05`, `2020.03.05`, `20200305`, `5/3/2020`, `5-3-2020`, `5.3.2020`, `5 Mar 2020`, and `5 March 2020`. **Dates with `/`, `-` or `.` separators and the year last are read day-first** (`05/03/2020` is 5 March), because month-first would be ambiguous with them.
-- `DateTo` may be empty or `NULL` (any case), meaning the assignment is still ongoing and ends today.
-- `DateFrom` must not be after `DateTo`.
-- All rows are validated. If any row is invalid, no pairs are calculated and every error is returned with its line number in the file (`PairReportService.Run` returns a `PairReport` with `Errors`).
-
-### Console app
+## Design
 
 ```
-dotnet run --project src/Employees.Console -- path/to/assignments.csv
+Employees.Core          parsing and pair finding, no UI dependency
+Employees.Console       command line front end
+Employees.Web           ASP.NET Core MVC front end (one controller, one view)
+Employees.Core.Tests    xUnit tests for the core
 ```
 
-Prints the longest pair(s) with the days worked together, or the list of invalid rows. Exit code: `0` success, `1` invalid rows in the file, `2` bad arguments or missing file. A sample file is in `src/Employees.Console/sample.csv`.
+- The core is built from small interfaces with constructor injection: `IAssignmentParser`, `IPairFinder` and `IPairReportService`. The web app registers them in `Program.cs`; the console app wires them by hand.
+- Today's date (for open-ended assignments) comes from an injected `TimeProvider`, so tests use a fixed date instead of depending on the clock.
+- The parser takes a `TextReader`, not a file path, so it does not care where the data comes from (file, upload, string in a test). It is synchronous on purpose: it is CPU-bound work, and the upload is already handled by the framework.
 
-## Open requirements questions
+## Known limitations and open questions
 
-- **Should a calendar day be counted once per pair, even if the pair works together on several projects at the same time?** Currently the overlap days of each project are simply summed, so a day on which a pair shares two projects counts twice. If each calendar day must count only once per pair, the overlapping date ranges per pair need to be merged before counting.
-- **Can one employee have overlapping assignments on the same project?** The code does not treat this as a special case: an employee is never paired with themselves, but if such assignments overlap with a colleague's, the shared days are counted once per overlapping assignment. If this situation is invalid in the source data (for example, an employee cannot be assigned to the same project twice at the same time), it should be rejected with a validation error, or confirmed as legitimate. This needs to be clarified with the requirement owner.
+- **No Project ID column in the UI.** The task asks for a grid of common projects (Employee ID #1, Employee ID #2, Project ID, Days worked). The core currently returns only the total days per pair, so the UI shows that. Showing days per project needs a small change in `PairFinder`, which already tracks overlaps per project internally.
+- **Same day on several projects.** Days are summed per project, so a day the pair shares on two projects counts twice. If each calendar day should count once per pair, the date ranges per pair would need to be merged first.
+- **Overlapping assignments of the same employee on one project.** They are not treated as a special case; an employee is never paired with themselves, but shared days are counted once per overlapping assignment. This should either be rejected as invalid data or confirmed as legitimate.

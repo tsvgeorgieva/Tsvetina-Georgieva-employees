@@ -1,0 +1,69 @@
+@model PairReport?
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Employees</title>
+    <style>
+        :root { --accent: #2563eb; --border: #e2e8f0; --muted: #64748b; }
+        * { box-sizing: border-box; }
+        body { margin: 0; padding: 2rem 1rem; background: #f1f5f9; color: #0f172a; font-family: system-ui, "Segoe UI", sans-serif; }
+        main { max-width: 640px; margin: 0 auto; background: #fff; border-radius: 12px; padding: 2rem; box-shadow: 0 1px 3px rgb(0 0 0 / .1); }
+        h1 { margin: 0 0 .25rem; font-size: 1.5rem; }
+        .hint { margin: 0 0 1.5rem; color: var(--muted); font-size: .9rem; }
+        .upload { display: block; padding: 1.5rem; border: 2px dashed var(--border); border-radius: 8px; text-align: center; color: var(--muted); cursor: pointer; transition: .15s; }
+        .upload:hover { border-color: var(--accent); color: var(--accent); background: #eff6ff; }
+        .upload input { display: none; }
+        table { width: 100%; margin-top: 1.5rem; border-collapse: collapse; }
+        th, td { padding: .65rem .9rem; text-align: left; border-bottom: 1px solid var(--border); }
+        th { background: #f8fafc; color: var(--muted); font-size: .8rem; text-transform: uppercase; letter-spacing: .04em; }
+        tbody tr:hover { background: #f8fafc; }
+        .message { margin-top: 1.5rem; padding: .75rem 1rem; border-radius: 8px; background: #f1f5f9; }
+        .error { background: #fef2f2; color: #b91c1c; margin: .5rem 0 0; }
+    </style>
+</head>
+<body>
+    <main>
+        <h1>Longest working pair</h1>
+        <p class="hint">Upload a CSV file with: EmpID, ProjectID, DateFrom, DateTo</p>
+
+        <form method="post" enctype="multipart/form-data">
+            <label class="upload">
+                Click to choose a file
+                <input type="file" name="file" accept=".csv,.txt" onchange="this.form.submit()" />
+            </label>
+        </form>
+
+        @if (Model is not null)
+        {
+            @foreach (var error in Model.Errors)
+            {
+                <p class="message error">Line @error.Line: @error.Message</p>
+            }
+
+            @if (Model.IsValid && Model.Pairs.Count == 0)
+            {
+                <p class="message">No employees worked together on a common project.</p>
+            }
+            else if (Model.IsValid)
+            {
+                <table>
+                    <thead>
+                        <tr><th>Employee ID #1</th><th>Employee ID #2</th><th>Days worked together</th></tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var pair in Model.Pairs)
+                        {
+                            <tr><td>@pair.Employee1</td><td>@pair.Employee2</td><td>@pair.Days</td></tr>
+                        }
+                    </tbody>
+                </table>
+            }
+        }
+    </main>
+</body>
+</html>

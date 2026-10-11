@@ -2,4 +2,5 @@
   <Project Path="Employees.Console/Employees.Console.csproj" />
   <Project Path="Employees.Core.Tests/Employees.Core.Tests.csproj" />
   <Project Path="Employees.Core/Employees.Core.csproj" />
+  <Project Path="Employees.Web/Employees.Web.csproj" />
 </Solution>

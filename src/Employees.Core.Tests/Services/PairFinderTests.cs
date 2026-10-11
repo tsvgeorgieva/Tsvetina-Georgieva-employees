@@ -2,16 +2,18 @@ namespace Employees.Core.Tests.Services;
 
 public class PairFinderTests
 {
+    private static readonly PairFinder Finder = new();
+
     [Fact]
     public void FindLongestPairs_NoAssignments_ReturnsEmptyList()
     {
-        Assert.Empty(PairFinder.FindLongestPairs([]));
+        Assert.Empty(Finder.FindLongestPairs([]));
     }
 
     [Fact]
     public void FindLongestPairs_SingleAssignment_ReturnsEmptyList()
     {
-        var result = PairFinder.FindLongestPairs([CreateAssignment(1, 10, "2020-01-01", "2020-01-10")]);
+        var result = Finder.FindLongestPairs([CreateAssignment(1, 10, "2020-01-01", "2020-01-10")]);
 
         Assert.Empty(result);
     }
@@ -19,7 +21,7 @@ public class PairFinderTests
     [Fact]
     public void FindLongestPairs_EmployeesOnDifferentProjects_ReturnsEmptyList()
     {
-        var result = PairFinder.FindLongestPairs(
+        var result = Finder.FindLongestPairs(
         [
             CreateAssignment(1, 10, "2020-01-01", "2020-01-10"),
             CreateAssignment(2, 20, "2020-01-01", "2020-01-10"),
@@ -31,7 +33,7 @@ public class PairFinderTests
     [Fact]
     public void FindLongestPairs_SameProjectWithoutDateOverlap_ReturnsEmptyList()
     {
-        var result = PairFinder.FindLongestPairs(
+        var result = Finder.FindLongestPairs(
         [
             CreateAssignment(1, 10, "2020-01-01", "2020-01-10"),
             CreateAssignment(2, 10, "2020-01-11", "2020-01-20"),
@@ -43,7 +45,7 @@ public class PairFinderTests
     [Fact]
     public void FindLongestPairs_TwoEmployeesOverlappingOnSameProject_ReturnsOverlapInDays()
     {
-        var result = PairFinder.FindLongestPairs(
+        var result = Finder.FindLongestPairs(
         [
             CreateAssignment(1, 10, "2020-01-01", "2020-01-10"),
             CreateAssignment(2, 10, "2020-01-05", "2020-01-20"),
@@ -55,7 +57,7 @@ public class PairFinderTests
     [Fact]
     public void FindLongestPairs_IdenticalPeriods_ReturnsFullPeriod()
     {
-        var result = PairFinder.FindLongestPairs(
+        var result = Finder.FindLongestPairs(
         [
             CreateAssignment(1, 10, "2020-01-01", "2020-01-10"),
             CreateAssignment(2, 10, "2020-01-01", "2020-01-10"),
@@ -67,7 +69,7 @@ public class PairFinderTests
     [Fact]
     public void FindLongestPairs_OneAssignmentContainedInAnother_ReturnsInnerDuration()
     {
-        var result = PairFinder.FindLongestPairs(
+        var result = Finder.FindLongestPairs(
         [
             CreateAssignment(1, 10, "2020-01-01", "2020-12-31"),
             CreateAssignment(2, 10, "2020-03-01", "2020-03-10"),
@@ -79,7 +81,7 @@ public class PairFinderTests
     [Fact]
     public void FindLongestPairs_AssignmentsTouchingOnSingleDay_CountsInclusiveDay()
     {
-        var result = PairFinder.FindLongestPairs(
+        var result = Finder.FindLongestPairs(
         [
             CreateAssignment(1, 10, "2020-01-01", "2020-01-10"),
             CreateAssignment(2, 10, "2020-01-10", "2020-01-20"),
@@ -91,7 +93,7 @@ public class PairFinderTests
     [Fact]
     public void FindLongestPairs_SingleDayAssignments_CountsOneDay()
     {
-        var result = PairFinder.FindLongestPairs(
+        var result = Finder.FindLongestPairs(
         [
             CreateAssignment(1, 10, "2020-01-05", "2020-01-05"),
             CreateAssignment(2, 10, "2020-01-05", "2020-01-05"),
@@ -103,7 +105,7 @@ public class PairFinderTests
     [Fact]
     public void FindLongestPairs_OverlapSpanningLeapDay_CountsCalendarDays()
     {
-        var result = PairFinder.FindLongestPairs(
+        var result = Finder.FindLongestPairs(
         [
             CreateAssignment(1, 10, "2020-02-27", "2020-03-02"),
             CreateAssignment(2, 10, "2020-02-27", "2020-03-02"),
@@ -115,7 +117,7 @@ public class PairFinderTests
     [Fact]
     public void FindLongestPairs_OverlapSpanningYearBoundary_CountsCalendarDays()
     {
-        var result = PairFinder.FindLongestPairs(
+        var result = Finder.FindLongestPairs(
         [
             CreateAssignment(1, 10, "2020-12-25", "2021-01-05"),
             CreateAssignment(2, 10, "2020-12-25", "2021-01-05"),
@@ -127,7 +129,7 @@ public class PairFinderTests
     [Fact]
     public void FindLongestPairs_EmployeeWithBackToBackAssignmentsOnSameProject_CountsBothPeriods()
     {
-        var result = PairFinder.FindLongestPairs(
+        var result = Finder.FindLongestPairs(
         [
             CreateAssignment(1, 10, "2020-01-01", "2020-01-10"),
             CreateAssignment(1, 10, "2020-01-11", "2020-01-20"),
@@ -140,7 +142,7 @@ public class PairFinderTests
     [Fact]
     public void FindLongestPairs_EmployeeOnExtraProjectWithoutPartner_DoesNotCountExtraProjectDays()
     {
-        var result = PairFinder.FindLongestPairs(
+        var result = Finder.FindLongestPairs(
         [
             CreateAssignment(1, 10, "2020-01-01", "2020-01-10"),
             CreateAssignment(1, 20, "2020-01-01", "2020-01-10"),
@@ -154,7 +156,7 @@ public class PairFinderTests
     public void FindLongestPairs_ThreeEmployeesOnOneProject_ReturnsPairWithLongestOverlap()
     {
         // 1&2 share Jan 1-10 (10), 1&3 share Jan 5-31 (27), 2&3 share Jan 5-10 (6).
-        var result = PairFinder.FindLongestPairs(
+        var result = Finder.FindLongestPairs(
         [
             CreateAssignment(1, 10, "2020-01-01", "2020-01-31"),
             CreateAssignment(2, 10, "2020-01-01", "2020-01-10"),
@@ -168,7 +170,7 @@ public class PairFinderTests
     public void FindLongestPairs_SeveralAssignmentsEndingOnSameDay_ReturnsPairWithLongestOverlap()
     {
         // 1&2 share 3 days, 1&3 share 3 days, 2&3 share 6 days (Jan 5-10).
-        var result = PairFinder.FindLongestPairs(
+        var result = Finder.FindLongestPairs(
         [
             CreateAssignment(1, 10, "2020-01-08", "2020-01-10"),
             CreateAssignment(2, 10, "2020-01-05", "2020-01-10"),
@@ -181,7 +183,7 @@ public class PairFinderTests
     [Fact]
     public void FindLongestPairs_MultiplePairsOnDifferentProjects_ReturnsPairWithLongestOverlap()
     {
-        var result = PairFinder.FindLongestPairs(
+        var result = Finder.FindLongestPairs(
         [
             CreateAssignment(1, 10, "2020-01-01", "2020-01-05"),
             CreateAssignment(2, 10, "2020-01-01", "2020-01-05"),
@@ -195,7 +197,7 @@ public class PairFinderTests
     [Fact]
     public void FindLongestPairs_PairsWithEqualDays_ReturnsAllOfThem()
     {
-        var result = PairFinder.FindLongestPairs(
+        var result = Finder.FindLongestPairs(
         [
             CreateAssignment(7, 20, "2020-01-01", "2020-01-10"),
             CreateAssignment(8, 20, "2020-01-01", "2020-01-10"),
@@ -215,7 +217,7 @@ public class PairFinderTests
     [Fact]
     public void FindLongestPairs_ThreeEmployeesWithIdenticalPeriods_ReturnsEveryCombination()
     {
-        var result = PairFinder.FindLongestPairs(
+        var result = Finder.FindLongestPairs(
         [
             CreateAssignment(1, 10, "2020-01-01", "2020-01-10"),
             CreateAssignment(2, 10, "2020-01-01", "2020-01-10"),
@@ -233,7 +235,7 @@ public class PairFinderTests
     public void FindLongestPairs_LongestPairFoundBeforeShorterOnes_StaysTheOnlyResult()
     {
         // Pairs are finalized in order of end date: 1&2 (10 days), then 3&4 (5 days), then 5&6 (7 days).
-        var result = PairFinder.FindLongestPairs(
+        var result = Finder.FindLongestPairs(
         [
             CreateAssignment(1, 10, "2020-01-01", "2020-01-10"),
             CreateAssignment(2, 10, "2020-01-01", "2020-01-10"),
@@ -249,7 +251,7 @@ public class PairFinderTests
     [Fact]
     public void FindLongestPairs_ShorterPairsAreNotReturnedAlongsideTies()
     {
-        var result = PairFinder.FindLongestPairs(
+        var result = Finder.FindLongestPairs(
         [
             CreateAssignment(1, 10, "2020-01-01", "2020-01-10"),
             CreateAssignment(2, 10, "2020-01-01", "2020-01-10"),
@@ -265,7 +267,7 @@ public class PairFinderTests
     [Fact]
     public void FindLongestPairs_SamePairWithTwoSeparatePeriodsOnOneProject_SumsDays()
     {
-        var result = PairFinder.FindLongestPairs(
+        var result = Finder.FindLongestPairs(
         [
             CreateAssignment(1, 10, "2020-01-01", "2020-01-10"),
             CreateAssignment(2, 10, "2020-01-01", "2020-01-10"),
@@ -281,7 +283,7 @@ public class PairFinderTests
     {
         // 1&2 work together 10 days on project 10 and 10 days on project 20 (20 total),
         // which beats 1&3 who share 15 days on project 30.
-        var result = PairFinder.FindLongestPairs(
+        var result = Finder.FindLongestPairs(
         [
             CreateAssignment(1, 10, "2020-01-01", "2020-01-10"),
             CreateAssignment(2, 10, "2020-01-01", "2020-01-10"),
@@ -297,7 +299,7 @@ public class PairFinderTests
     [Fact]
     public void FindLongestPairs_SamePairOnSeveralProjectsAtTheSameTime_SumsDaysPerProject()
     {
-        var result = PairFinder.FindLongestPairs(
+        var result = Finder.FindLongestPairs(
         [
             CreateAssignment(1, 10, "2020-01-01", "2020-01-10"),
             CreateAssignment(2, 10, "2020-01-01", "2020-01-10"),
@@ -311,7 +313,7 @@ public class PairFinderTests
     [Fact]
     public void FindLongestPairs_InputInReverseOrder_ReturnsSameResult()
     {
-        var result = PairFinder.FindLongestPairs(
+        var result = Finder.FindLongestPairs(
         [
             CreateAssignment(2, 10, "2020-01-05", "2020-01-20"),
             CreateAssignment(1, 10, "2020-01-01", "2020-01-10"),
@@ -323,7 +325,7 @@ public class PairFinderTests
     [Fact]
     public void FindLongestPairs_EmployeeIdsInDescendingOrder_ReportsSmallerIdFirst()
     {
-        var result = PairFinder.FindLongestPairs(
+        var result = Finder.FindLongestPairs(
         [
             CreateAssignment(9, 10, "2020-01-01", "2020-01-10"),
             CreateAssignment(3, 10, "2020-01-01", "2020-01-10"),

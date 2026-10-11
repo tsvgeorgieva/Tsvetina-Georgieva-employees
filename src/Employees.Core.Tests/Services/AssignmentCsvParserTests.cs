@@ -3,6 +3,7 @@ namespace Employees.Core.Tests.Services;
 public class AssignmentCsvParserTests
 {
     private static readonly DateOnly Today = new(2024, 6, 15);
+    private static readonly AssignmentCsvParser Parser = new();
 
     [Fact]
     public void Parse_ValidRows_ParsesAllRows()
@@ -130,5 +131,5 @@ public class AssignmentCsvParserTests
     }
 
     private static CsvParseResult Parse(string csv) =>
-        AssignmentCsvParser.Parse(new StringReader(csv), Today);
+        Parser.Parse(new StringReader(csv), Today);
 }

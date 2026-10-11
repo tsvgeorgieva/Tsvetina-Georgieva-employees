@@ -1,13 +1,14 @@
 namespace Employees.Core;
 
-public static class PairReportService
+public class PairReportService(IAssignmentParser parser, IPairFinder pairFinder, TimeProvider timeProvider) : IPairReportService
 {
-    public static PairReport Run(TextReader reader, DateOnly today)
+    public PairReport Run(TextReader reader)
     {
-        var parsed = AssignmentCsvParser.Parse(reader, today);
+        var today = DateOnly.FromDateTime(timeProvider.GetLocalNow().DateTime);
+        var parsed = parser.Parse(reader, today);
 
         return parsed.IsValid
-            ? new PairReport(PairFinder.FindLongestPairs(parsed.Assignments), [])
+            ? new PairReport(pairFinder.FindLongestPairs(parsed.Assignments), [])
             : new PairReport([], parsed.Errors);
     }
 }

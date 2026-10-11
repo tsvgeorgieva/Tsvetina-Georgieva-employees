@@ -2,7 +2,8 @@ namespace Employees.Core.Tests.Services;
 
 public class PairReportServiceTests
 {
-    private static readonly DateOnly Today = new(2024, 6, 15);
+    private static readonly PairReportService Service = new(
+        new AssignmentCsvParser(), new PairFinder(), new FixedTimeProvider(new DateTime(2024, 6, 15, 0, 0, 0, DateTimeKind.Utc)));
 
     [Fact]
     public void Run_ValidCsv_ReturnsLongestPair()
@@ -50,5 +51,5 @@ public class PairReportServiceTests
     }
 
     private static PairReport Run(string csv) =>
-        PairReportService.Run(new StringReader(csv), Today);
+        Service.Run(new StringReader(csv));
 }

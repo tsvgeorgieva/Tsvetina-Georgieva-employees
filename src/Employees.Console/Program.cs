@@ -13,7 +13,8 @@ if (!File.Exists(args[0]))
 }
 
 using var reader = new StreamReader(args[0]);
-var report = PairReportService.Run(reader, DateOnly.FromDateTime(DateTime.Today));
+IPairReportService service = new PairReportService(new AssignmentCsvParser(), new PairFinder(), TimeProvider.System);
+var report = service.Run(reader);
 
 if (!report.IsValid)
 {

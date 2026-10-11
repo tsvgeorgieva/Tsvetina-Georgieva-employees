@@ -2,7 +2,7 @@ using System.Globalization;
 
 namespace Employees.Core;
 
-public static class AssignmentCsvParser
+public class AssignmentCsvParser : IAssignmentParser
 {
     private const int ColumnCount = 4;
 
@@ -20,7 +20,7 @@ public static class AssignmentCsvParser
         "d MMMM yyyy",
     ];
 
-    public static CsvParseResult Parse(TextReader reader, DateOnly today)
+    public CsvParseResult Parse(TextReader reader, DateOnly today)
     {
         var assignments = new List<Assignment>();
         var errors = new List<CsvParseError>();
