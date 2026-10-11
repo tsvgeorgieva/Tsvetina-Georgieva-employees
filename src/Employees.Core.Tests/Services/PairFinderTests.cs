@@ -89,6 +89,18 @@ public class PairFinderTests
     }
 
     [Fact]
+    public void FindLongestPair_SingleDayAssignments_CountsOneDay()
+    {
+        var result = PairFinder.FindLongestPair(
+        [
+            CreateAssignment(1, 10, "2020-01-05", "2020-01-05"),
+            CreateAssignment(2, 10, "2020-01-05", "2020-01-05"),
+        ]);
+
+        AssertPair(result, 1, 2, 1);
+    }
+
+    [Fact]
     public void FindLongestPair_OverlapSpanningLeapDay_CountsCalendarDays()
     {
         var result = PairFinder.FindLongestPair(
@@ -101,6 +113,18 @@ public class PairFinderTests
     }
 
     [Fact]
+    public void FindLongestPair_OverlapSpanningYearBoundary_CountsCalendarDays()
+    {
+        var result = PairFinder.FindLongestPair(
+        [
+            CreateAssignment(1, 10, "2020-12-25", "2021-01-05"),
+            CreateAssignment(2, 10, "2020-12-25", "2021-01-05"),
+        ]);
+
+        AssertPair(result, 1, 2, 12);
+    }
+
+    [Fact]
     public void FindLongestPair_EmployeeWithOverlappingAssignmentsOnSameProject_DoesNotCountSharedDaysTwice()
     {
         // Employee 1 holds two overlapping assignments on project 10, employee 2 works Jan 1-10.
@@ -109,6 +133,46 @@ public class PairFinderTests
         [
             CreateAssignment(1, 10, "2020-01-01", "2020-01-10"),
             CreateAssignment(1, 10, "2020-01-05", "2020-01-10"),
+            CreateAssignment(2, 10, "2020-01-01", "2020-01-10"),
+        ]);
+
+        AssertPair(result, 1, 2, 10);
+    }
+
+    [Fact]
+    public void FindLongestPair_EmployeeWithPartiallyOverlappingAssignmentsOnSameProject_TreatsThemAsOnePeriod()
+    {
+        // Employee 1 is on project 10 from Jan 1 to Jan 20 (two chained assignments).
+        var result = PairFinder.FindLongestPair(
+        [
+            CreateAssignment(1, 10, "2020-01-01", "2020-01-10"),
+            CreateAssignment(1, 10, "2020-01-05", "2020-01-20"),
+            CreateAssignment(2, 10, "2020-01-01", "2020-01-31"),
+        ]);
+
+        AssertPair(result, 1, 2, 20);
+    }
+
+    [Fact]
+    public void FindLongestPair_EmployeeWithBackToBackAssignmentsOnSameProject_CountsBothPeriods()
+    {
+        var result = PairFinder.FindLongestPair(
+        [
+            CreateAssignment(1, 10, "2020-01-01", "2020-01-10"),
+            CreateAssignment(1, 10, "2020-01-11", "2020-01-20"),
+            CreateAssignment(2, 10, "2020-01-01", "2020-01-20"),
+        ]);
+
+        AssertPair(result, 1, 2, 20);
+    }
+
+    [Fact]
+    public void FindLongestPair_EmployeeOnExtraProjectWithoutPartner_DoesNotCountExtraProjectDays()
+    {
+        var result = PairFinder.FindLongestPair(
+        [
+            CreateAssignment(1, 10, "2020-01-01", "2020-01-10"),
+            CreateAssignment(1, 20, "2020-01-01", "2020-01-10"),
             CreateAssignment(2, 10, "2020-01-01", "2020-01-10"),
         ]);
 
@@ -130,6 +194,20 @@ public class PairFinderTests
     }
 
     [Fact]
+    public void FindLongestPair_SeveralAssignmentsEndingOnSameDay_ReturnsPairWithLongestOverlap()
+    {
+        // 1&2 share 3 days, 1&3 share 3 days, 2&3 share 6 days (Jan 5-10).
+        var result = PairFinder.FindLongestPair(
+        [
+            CreateAssignment(1, 10, "2020-01-08", "2020-01-10"),
+            CreateAssignment(2, 10, "2020-01-05", "2020-01-10"),
+            CreateAssignment(3, 10, "2020-01-01", "2020-01-10"),
+        ]);
+
+        AssertPair(result, 2, 3, 6);
+    }
+
+    [Fact]
     public void FindLongestPair_MultiplePairsOnDifferentProjects_ReturnsPairWithLongestOverlap()
     {
         var result = PairFinder.FindLongestPair(
@@ -141,6 +219,22 @@ public class PairFinderTests
         ]);
 
         AssertPair(result, 3, 4, 28);
+    }
+
+    [Fact]
+    public void FindLongestPair_PairsWithEqualDays_ReturnsPairWithLowestEmployeeIds()
+    {
+        var result = PairFinder.FindLongestPair(
+        [
+            CreateAssignment(7, 20, "2020-01-01", "2020-01-10"),
+            CreateAssignment(8, 20, "2020-01-01", "2020-01-10"),
+            CreateAssignment(3, 10, "2020-01-01", "2020-01-10"),
+            CreateAssignment(4, 10, "2020-01-01", "2020-01-10"),
+            CreateAssignment(5, 30, "2020-01-01", "2020-01-10"),
+            CreateAssignment(6, 30, "2020-01-01", "2020-01-10"),
+        ]);
+
+        AssertPair(result, 3, 4, 10);
     }
 
     [Fact]
@@ -176,6 +270,20 @@ public class PairFinderTests
     }
 
     [Fact]
+    public void FindLongestPair_SamePairOnSeveralProjectsAtTheSameTime_CountsCalendarDaysOnce()
+    {
+        var result = PairFinder.FindLongestPair(
+        [
+            CreateAssignment(1, 10, "2020-01-01", "2020-01-10"),
+            CreateAssignment(2, 10, "2020-01-01", "2020-01-10"),
+            CreateAssignment(1, 20, "2020-01-06", "2020-01-15"),
+            CreateAssignment(2, 20, "2020-01-06", "2020-01-15"),
+        ]);
+
+        AssertPair(result, 1, 2, 15);
+    }
+
+    [Fact]
     public void FindLongestPair_InputInReverseOrder_ReturnsSameResult()
     {
         var result = PairFinder.FindLongestPair(
@@ -197,6 +305,18 @@ public class PairFinderTests
         ]);
 
         AssertPair(result, 3, 9, 10);
+    }
+
+    [Fact]
+    public void FindLongestPair_AssignmentStartingAfterItEnds_ThrowsArgumentException()
+    {
+        var assignments = new[]
+        {
+            CreateAssignment(1, 10, "2020-01-01", "2020-01-10"),
+            CreateAssignment(2, 10, "2020-01-20", "2020-01-05"),
+        };
+
+        Assert.Throws<ArgumentException>(() => PairFinder.FindLongestPair(assignments));
     }
 
     private static Assignment CreateAssignment(int employeeId, int projectId, string from, string to) =>
