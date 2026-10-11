@@ -30,7 +30,7 @@ public static class PairFinder
         var pairOverlaps = new Dictionary<(int Employee1, int Employee2), List<DateRange>>();
         var activeAssignments = new HashSet<Assignment>();
 
-        foreach (var point in ToSortedPoints(MergeOverlappingPerEmployeeProject(assignments)))
+        foreach (var point in ToSortedPoints(assignments))
         {
             if (point.Type == AssignmentPointType.Start)
             {
@@ -60,34 +60,6 @@ public static class PairFinder
         return points.OrderBy(point => point.Date).ThenBy(point => point.Type);
     }
 
-    private static IEnumerable<Assignment> MergeOverlappingPerEmployeeProject(IEnumerable<Assignment> assignments)
-    {
-        foreach (var group in assignments.GroupBy(a => (a.EmployeeId, a.ProjectId)))
-        {
-            Assignment? previousAssignment = null;
-            foreach (var currentAssignment in group.OrderBy(a => a.From))
-            {
-                if (previousAssignment is null)
-                {
-                    previousAssignment = currentAssignment;
-                    continue;
-                }
-
-                if (currentAssignment.From <= previousAssignment.To)
-                {
-                    previousAssignment = previousAssignment with { To = currentAssignment.To > previousAssignment.To ? currentAssignment.To : previousAssignment.To };
-                }
-                else
-                {
-                    yield return previousAssignment;
-                    previousAssignment = currentAssignment;
-                }
-            }
-
-            yield return previousAssignment!;
-        }
-    }
-
     private static void AccumulateOverlaps(
         Dictionary<(int Employee1, int Employee2), List<DateRange>> pairOverlaps,
         AssignmentPoint currentPoint,
@@ -97,7 +69,7 @@ public static class PairFinder
 
         foreach (var activeAssignment in activeAssignments)
         {
-            if (activeAssignment.ProjectId != ending.ProjectId)
+            if (activeAssignment.ProjectId != ending.ProjectId || activeAssignment.EmployeeId == ending.EmployeeId)
             {
                 continue;
             }
