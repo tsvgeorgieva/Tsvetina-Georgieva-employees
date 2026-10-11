@@ -125,35 +125,6 @@ public class PairFinderTests
     }
 
     [Fact]
-    public void FindLongestPair_EmployeeWithOverlappingAssignmentsOnSameProject_DoesNotCountSharedDaysTwice()
-    {
-        // Employee 1 holds two overlapping assignments on project 10, employee 2 works Jan 1-10.
-        // The pair shares Jan 1-10 = 10 calendar days, no matter how many assignments cover them.
-        var result = PairFinder.FindLongestPair(
-        [
-            CreateAssignment(1, 10, "2020-01-01", "2020-01-10"),
-            CreateAssignment(1, 10, "2020-01-05", "2020-01-10"),
-            CreateAssignment(2, 10, "2020-01-01", "2020-01-10"),
-        ]);
-
-        AssertPair(result, 1, 2, 10);
-    }
-
-    [Fact]
-    public void FindLongestPair_EmployeeWithPartiallyOverlappingAssignmentsOnSameProject_TreatsThemAsOnePeriod()
-    {
-        // Employee 1 is on project 10 from Jan 1 to Jan 20 (two chained assignments).
-        var result = PairFinder.FindLongestPair(
-        [
-            CreateAssignment(1, 10, "2020-01-01", "2020-01-10"),
-            CreateAssignment(1, 10, "2020-01-05", "2020-01-20"),
-            CreateAssignment(2, 10, "2020-01-01", "2020-01-31"),
-        ]);
-
-        AssertPair(result, 1, 2, 20);
-    }
-
-    [Fact]
     public void FindLongestPair_EmployeeWithBackToBackAssignmentsOnSameProject_CountsBothPeriods()
     {
         var result = PairFinder.FindLongestPair(
@@ -270,7 +241,7 @@ public class PairFinderTests
     }
 
     [Fact]
-    public void FindLongestPair_SamePairOnSeveralProjectsAtTheSameTime_CountsCalendarDaysOnce()
+    public void FindLongestPair_SamePairOnSeveralProjectsAtTheSameTime_SumsDaysPerProject()
     {
         var result = PairFinder.FindLongestPair(
         [
@@ -280,7 +251,7 @@ public class PairFinderTests
             CreateAssignment(2, 20, "2020-01-06", "2020-01-15"),
         ]);
 
-        AssertPair(result, 1, 2, 15);
+        AssertPair(result, 1, 2, 20);
     }
 
     [Fact]

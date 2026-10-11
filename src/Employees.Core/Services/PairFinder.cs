@@ -3,17 +3,15 @@ namespace Employees.Core;
 public static class PairFinder
 {
     public static EmployeePair? FindLongestPair(IEnumerable<Assignment> assignments)
-    {
-        return FindPairOverlaps(assignments)
+        => FindPairOverlaps(assignments)
             .OrderByDescending(pair => pair.Days)
             .ThenBy(pair => pair.Employee1)
             .ThenBy(pair => pair.Employee2)
             .FirstOrDefault();
-    }
 
     private static IEnumerable<EmployeePair> FindPairOverlaps(IEnumerable<Assignment> assignments)
     {
-        var pairOverlaps = new Dictionary<(int Employee1, int Employee2), List<DateRange>>();
+        var pairOverlaps = new Dictionary<(int Employee1, int Employee2), long>();
         var activeAssignments = new HashSet<Assignment>();
 
         foreach (var point in ToSortedPoints(assignments))
@@ -25,13 +23,13 @@ public static class PairFinder
             }
 
             activeAssignments.Remove(point.Assignment);
-            AccumulateOverlaps(pairOverlaps, point, activeAssignments);
+            AccumulateOverlaps(pairOverlaps, point.Assignment, activeAssignments);
         }
 
         return pairOverlaps.Select(entry => new EmployeePair(
             entry.Key.Employee1,
             entry.Key.Employee2,
-            CountCalendarDays(entry.Value)));
+            entry.Value));
     }
 
     private static IEnumerable<AssignmentPoint> ToSortedPoints(IEnumerable<Assignment> assignments)
@@ -47,12 +45,10 @@ public static class PairFinder
     }
 
     private static void AccumulateOverlaps(
-        Dictionary<(int Employee1, int Employee2), List<DateRange>> pairOverlaps,
-        AssignmentPoint currentPoint,
+        Dictionary<(int Employee1, int Employee2), long> pairOverlaps,
+        Assignment ending,
         IEnumerable<Assignment> activeAssignments)
     {
-        var ending = currentPoint.Assignment;
-
         foreach (var activeAssignment in activeAssignments)
         {
             if (activeAssignment.ProjectId != ending.ProjectId || activeAssignment.EmployeeId == ending.EmployeeId)
@@ -61,48 +57,10 @@ public static class PairFinder
             }
 
             var key = (Math.Min(ending.EmployeeId, activeAssignment.EmployeeId), Math.Max(ending.EmployeeId, activeAssignment.EmployeeId));
-            var overlap = new DateRange(
-                ending.From > activeAssignment.From ? ending.From : activeAssignment.From,
-                currentPoint.Date);
+            var overlapStart = ending.From > activeAssignment.From ? ending.From : activeAssignment.From;
+            var overlapDays = ending.To.DayNumber - overlapStart.DayNumber + 1;
 
-            if (!pairOverlaps.TryGetValue(key, out var ranges))
-            {
-                pairOverlaps[key] = ranges = [];
-            }
-
-            ranges.Add(overlap);
+            pairOverlaps[key] = pairOverlaps.GetValueOrDefault(key) + overlapDays;
         }
-    }
-
-    // A pair can work together on several projects during the same dates, so the ranges are
-    // merged before counting to make sure each calendar day is counted only once.
-    private static long CountCalendarDays(List<DateRange> ranges)
-    {
-        long totalDays = 0;
-        DateRange? current = null;
-
-        foreach (var range in ranges.OrderBy(r => r.From))
-        {
-            if (current is null)
-            {
-                current = range;
-            }
-            else if (range.From > current.Value.To)
-            {
-                totalDays += current.Value.Days;
-                current = range;
-            }
-            else if (range.To > current.Value.To)
-            {
-                current = current.Value with { To = range.To };
-            }
-        }
-
-        return totalDays + (current?.Days ?? 0);
-    }
-
-    private readonly record struct DateRange(DateOnly From, DateOnly To)
-    {
-        public long Days => To.DayNumber - From.DayNumber + 1;
     }
 }
