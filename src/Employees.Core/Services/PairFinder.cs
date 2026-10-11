@@ -4,25 +4,11 @@ public static class PairFinder
 {
     public static EmployeePair? FindLongestPair(IEnumerable<Assignment> assignments)
     {
-        var assignmentList = assignments.ToList();
-        ValidateDateRanges(assignmentList);
-
-        return FindPairOverlaps(assignmentList)
+        return FindPairOverlaps(assignments)
             .OrderByDescending(pair => pair.Days)
             .ThenBy(pair => pair.Employee1)
             .ThenBy(pair => pair.Employee2)
             .FirstOrDefault();
-    }
-
-    private static void ValidateDateRanges(IEnumerable<Assignment> assignments)
-    {
-        var invalid = assignments.FirstOrDefault(a => a.From > a.To);
-        if (invalid is not null)
-        {
-            throw new ArgumentException(
-                $"Assignment of employee {invalid.EmployeeId} on project {invalid.ProjectId} starts ({invalid.From}) after it ends ({invalid.To}).",
-                nameof(assignments));
-        }
     }
 
     private static IEnumerable<EmployeePair> FindPairOverlaps(IEnumerable<Assignment> assignments)

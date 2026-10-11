@@ -9,7 +9,10 @@ Application that identifies the pair of employees who have worked together on co
 - A day is counted once per pair, no matter how many projects cover it. Days a pair spends together on different projects are added up only when they fall on different calendar days.
 - The pair with the most calendar days in total, across all common projects, is returned. If several pairs have the same total, the one with the lowest employee IDs wins (by the lower ID first, then the higher one).
 - If no two employees ever overlapped, no pair is returned.
-- An assignment whose start date is after its end date is invalid and causes an `ArgumentException`.
+
+## Assumptions
+
+- The data in the input file is correct and is not validated. In particular, every assignment is assumed to start on or before its end date; results for assignments that start after they end are undefined.
 
 ## Open requirements questions
 

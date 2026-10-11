@@ -307,18 +307,6 @@ public class PairFinderTests
         AssertPair(result, 3, 9, 10);
     }
 
-    [Fact]
-    public void FindLongestPair_AssignmentStartingAfterItEnds_ThrowsArgumentException()
-    {
-        var assignments = new[]
-        {
-            CreateAssignment(1, 10, "2020-01-01", "2020-01-10"),
-            CreateAssignment(2, 10, "2020-01-20", "2020-01-05"),
-        };
-
-        Assert.Throws<ArgumentException>(() => PairFinder.FindLongestPair(assignments));
-    }
-
     private static Assignment CreateAssignment(int employeeId, int projectId, string from, string to) =>
         new(employeeId, projectId, DateOnly.Parse(from), DateOnly.Parse(to));
 
