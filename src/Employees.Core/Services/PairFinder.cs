@@ -2,14 +2,28 @@ namespace Employees.Core;
 
 public static class PairFinder
 {
-    public static EmployeePair? FindLongestPair(IEnumerable<Assignment> assignments)
-        => FindPairOverlaps(assignments)
-            .OrderByDescending(pair => pair.Days)
-            .ThenBy(pair => pair.Employee1)
-            .ThenBy(pair => pair.Employee2)
-            .FirstOrDefault();
+    public static List<EmployeePair> FindLongestPairs(IEnumerable<Assignment> assignments)
+    {
+        var longestPairs = new List<EmployeePair>();
+        long maxDays = 0;
 
-    private static IEnumerable<EmployeePair> FindPairOverlaps(IEnumerable<Assignment> assignments)
+        foreach (var ((employee1, employee2), days) in FindPairOverlaps(assignments))
+        {
+            if (days > maxDays)
+            {
+                longestPairs = [new EmployeePair(employee1, employee2, days)];
+                maxDays = days;
+            }
+            else if (days == maxDays)
+            {
+                longestPairs.Add(new EmployeePair(employee1, employee2, days));
+            }
+        }
+
+        return longestPairs;
+    }
+
+    private static Dictionary<(int Employee1, int Employee2), long> FindPairOverlaps(IEnumerable<Assignment> assignments)
     {
         var pairOverlaps = new Dictionary<(int Employee1, int Employee2), long>();
         var activeAssignments = new HashSet<Assignment>();
@@ -26,10 +40,7 @@ public static class PairFinder
             AccumulateOverlaps(pairOverlaps, point.Assignment, activeAssignments);
         }
 
-        return pairOverlaps.Select(entry => new EmployeePair(
-            entry.Key.Employee1,
-            entry.Key.Employee2,
-            entry.Value));
+        return pairOverlaps;
     }
 
     private static IEnumerable<AssignmentPoint> ToSortedPoints(IEnumerable<Assignment> assignments)

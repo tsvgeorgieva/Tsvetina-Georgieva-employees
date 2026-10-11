@@ -6,8 +6,10 @@ Application that identifies the pair of employees who have worked together on co
 - Two employees are a pair when they worked on the same project during overlapping dates. Only the overlapping days count.
 - Dates are inclusive and counted as **calendar days**: an overlap from Jan 1 to Jan 10 is 10 days, and assignments that touch on a single day share 1 day.
 - Days a pair spends together are added up across all common projects.
-- The pair with the most calendar days in total, across all common projects, is returned. If several pairs have the same total, the one with the lowest employee IDs wins (by the lower ID first, then the higher one).
-- If no two employees ever overlapped, no pair is returned.
+- The pair with the most calendar days in total, across all common projects, is returned.
+- **If several pairs are tied for the longest total, all of them are returned**, not just one. The result is a list, and the order of pairs within it is not guaranteed.
+- Each pair is reported with the lower employee ID first.
+- If no two employees ever overlapped, an empty list is returned.
 
 ## Assumptions
 
