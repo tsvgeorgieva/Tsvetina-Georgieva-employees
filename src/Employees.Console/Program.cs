@@ -33,10 +33,13 @@ if (report.Pairs.Count == 0)
     return 0;
 }
 
-Console.WriteLine("Employee ID #1, Employee ID #2, Days worked together");
+Console.WriteLine("Employee ID #1, Employee ID #2, Project ID, Days worked together");
 foreach (var pair in report.Pairs)
 {
-    Console.WriteLine($"{pair.Employee1}, {pair.Employee2}, {pair.Days}");
+    foreach (var project in pair.Projects)
+    {
+        Console.WriteLine($"{pair.Employee1}, {pair.Employee2}, {project.ProjectId}, {project.Days}");
+    }
 }
 
 return 0;

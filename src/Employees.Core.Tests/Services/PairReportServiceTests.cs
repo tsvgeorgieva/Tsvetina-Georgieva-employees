@@ -14,7 +14,9 @@ public class PairReportServiceTests
             "3,10,2020-01-10,2020-01-12");
 
         Assert.True(report.IsValid);
-        Assert.Equal([new EmployeePair(1, 2, 5)], report.Pairs);
+        var pair = Assert.Single(report.Pairs);
+        Assert.Equal((1, 2, 5), (pair.Employee1, pair.Employee2, pair.Days));
+        Assert.Equal([new ProjectOverlap(10, 5)], pair.Projects);
     }
 
     [Fact]
@@ -24,7 +26,8 @@ public class PairReportServiceTests
             "1,10,2024-06-01,NULL\n" +
             "2,10,2024-06-10,2024-12-31");
 
-        Assert.Equal([new EmployeePair(1, 2, 6)], report.Pairs);
+        var pair = Assert.Single(report.Pairs);
+        Assert.Equal((1, 2, 6), (pair.Employee1, pair.Employee2, pair.Days));
     }
 
     [Fact]

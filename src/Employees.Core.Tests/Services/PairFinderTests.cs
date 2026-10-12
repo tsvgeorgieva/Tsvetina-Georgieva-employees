@@ -51,7 +51,7 @@ public class PairFinderTests
             CreateAssignment(2, 10, "2020-01-05", "2020-01-20"),
         ]);
 
-        AssertPair(result, 1, 2, 6);
+        AssertPair(result, 1, 2, (10, 6));
     }
 
     [Fact]
@@ -63,7 +63,7 @@ public class PairFinderTests
             CreateAssignment(2, 10, "2020-01-01", "2020-01-10"),
         ]);
 
-        AssertPair(result, 1, 2, 10);
+        AssertPair(result, 1, 2, (10, 10));
     }
 
     [Fact]
@@ -75,7 +75,7 @@ public class PairFinderTests
             CreateAssignment(2, 10, "2020-03-01", "2020-03-10"),
         ]);
 
-        AssertPair(result, 1, 2, 10);
+        AssertPair(result, 1, 2, (10, 10));
     }
 
     [Fact]
@@ -87,7 +87,7 @@ public class PairFinderTests
             CreateAssignment(2, 10, "2020-01-10", "2020-01-20"),
         ]);
 
-        AssertPair(result, 1, 2, 1);
+        AssertPair(result, 1, 2, (10, 1));
     }
 
     [Fact]
@@ -99,7 +99,7 @@ public class PairFinderTests
             CreateAssignment(2, 10, "2020-01-05", "2020-01-05"),
         ]);
 
-        AssertPair(result, 1, 2, 1);
+        AssertPair(result, 1, 2, (10, 1));
     }
 
     [Fact]
@@ -111,7 +111,7 @@ public class PairFinderTests
             CreateAssignment(2, 10, "2020-02-27", "2020-03-02"),
         ]);
 
-        AssertPair(result, 1, 2, 5);
+        AssertPair(result, 1, 2, (10, 5));
     }
 
     [Fact]
@@ -123,7 +123,7 @@ public class PairFinderTests
             CreateAssignment(2, 10, "2020-12-25", "2021-01-05"),
         ]);
 
-        AssertPair(result, 1, 2, 12);
+        AssertPair(result, 1, 2, (10, 12));
     }
 
     [Fact]
@@ -136,7 +136,7 @@ public class PairFinderTests
             CreateAssignment(2, 10, "2020-01-01", "2020-01-20"),
         ]);
 
-        AssertPair(result, 1, 2, 20);
+        AssertPair(result, 1, 2, (10, 20));
     }
 
     [Fact]
@@ -149,7 +149,7 @@ public class PairFinderTests
             CreateAssignment(2, 10, "2020-01-01", "2020-01-10"),
         ]);
 
-        AssertPair(result, 1, 2, 10);
+        AssertPair(result, 1, 2, (10, 10));
     }
 
     [Fact]
@@ -163,7 +163,7 @@ public class PairFinderTests
             CreateAssignment(3, 10, "2020-01-05", "2020-01-31"),
         ]);
 
-        AssertPair(result, 1, 3, 27);
+        AssertPair(result, 1, 3, (10, 27));
     }
 
     [Fact]
@@ -177,7 +177,7 @@ public class PairFinderTests
             CreateAssignment(3, 10, "2020-01-01", "2020-01-10"),
         ]);
 
-        AssertPair(result, 2, 3, 6);
+        AssertPair(result, 2, 3, (10, 6));
     }
 
     [Fact]
@@ -191,7 +191,7 @@ public class PairFinderTests
             CreateAssignment(4, 20, "2020-02-01", "2020-02-28"),
         ]);
 
-        AssertPair(result, 3, 4, 28);
+        AssertPair(result, 3, 4, (20, 28));
     }
 
     [Fact]
@@ -209,9 +209,9 @@ public class PairFinderTests
 
         AssertPairs(
             result,
-            new EmployeePair(3, 4, 10),
-            new EmployeePair(5, 6, 10),
-            new EmployeePair(7, 8, 10));
+            Pair(3, 4, (10, 10)),
+            Pair(5, 6, (30, 10)),
+            Pair(7, 8, (20, 10)));
     }
 
     [Fact]
@@ -226,9 +226,9 @@ public class PairFinderTests
 
         AssertPairs(
             result,
-            new EmployeePair(1, 2, 10),
-            new EmployeePair(1, 3, 10),
-            new EmployeePair(2, 3, 10));
+            Pair(1, 2, (10, 10)),
+            Pair(1, 3, (10, 10)),
+            Pair(2, 3, (10, 10)));
     }
 
     [Fact]
@@ -245,7 +245,7 @@ public class PairFinderTests
             CreateAssignment(6, 30, "2020-01-24", "2020-01-30"),
         ]);
 
-        AssertPair(result, 1, 2, 10);
+        AssertPair(result, 1, 2, (10, 10));
     }
 
     [Fact]
@@ -261,11 +261,11 @@ public class PairFinderTests
             CreateAssignment(6, 30, "2020-01-01", "2020-01-05"),
         ]);
 
-        AssertPairs(result, new EmployeePair(1, 2, 10), new EmployeePair(3, 4, 10));
+        AssertPairs(result, Pair(1, 2, (10, 10)), Pair(3, 4, (20, 10)));
     }
 
     [Fact]
-    public void FindLongestPairs_SamePairWithTwoSeparatePeriodsOnOneProject_SumsDays()
+    public void FindLongestPairs_SamePairWithTwoSeparatePeriodsOnOneProject_SumsDaysInOneProjectEntry()
     {
         var result = Finder.FindLongestPairs(
         [
@@ -275,7 +275,7 @@ public class PairFinderTests
             CreateAssignment(2, 10, "2020-06-01", "2020-06-05"),
         ]);
 
-        AssertPair(result, 1, 2, 15);
+        AssertPair(result, 1, 2, (10, 15));
     }
 
     [Fact]
@@ -293,7 +293,7 @@ public class PairFinderTests
             CreateAssignment(3, 30, "2020-03-01", "2020-03-15"),
         ]);
 
-        AssertPair(result, 1, 2, 20);
+        AssertPair(result, 1, 2, (10, 10), (20, 10));
     }
 
     [Fact]
@@ -307,7 +307,23 @@ public class PairFinderTests
             CreateAssignment(2, 20, "2020-01-06", "2020-01-15"),
         ]);
 
-        AssertPair(result, 1, 2, 20);
+        AssertPair(result, 1, 2, (10, 10), (20, 10));
+    }
+
+    [Fact]
+    public void FindLongestPairs_ProjectsAndPairs_AreOrderedById()
+    {
+        var result = Finder.FindLongestPairs(
+        [
+            CreateAssignment(8, 30, "2020-01-01", "2020-01-10"),
+            CreateAssignment(7, 30, "2020-01-01", "2020-01-10"),
+            CreateAssignment(8, 20, "2020-02-01", "2020-02-10"),
+            CreateAssignment(7, 20, "2020-02-01", "2020-02-10"),
+            CreateAssignment(2, 10, "2020-03-01", "2020-03-20"),
+            CreateAssignment(1, 10, "2020-03-01", "2020-03-20"),
+        ]);
+
+        AssertPairs(result, Pair(1, 2, (10, 20)), Pair(7, 8, (20, 10), (30, 10)));
     }
 
     [Fact]
@@ -319,7 +335,7 @@ public class PairFinderTests
             CreateAssignment(1, 10, "2020-01-01", "2020-01-10"),
         ]);
 
-        AssertPair(result, 1, 2, 6);
+        AssertPair(result, 1, 2, (10, 6));
     }
 
     [Fact]
@@ -331,18 +347,29 @@ public class PairFinderTests
             CreateAssignment(3, 10, "2020-01-01", "2020-01-10"),
         ]);
 
-        AssertPair(result, 3, 9, 10);
+        AssertPair(result, 3, 9, (10, 10));
     }
 
     private static Assignment CreateAssignment(int employeeId, int projectId, string from, string to) =>
         new(employeeId, projectId, DateOnly.Parse(from), DateOnly.Parse(to));
 
-    private static void AssertPair(List<EmployeePair> actual, int employee1, int employee2, long days) =>
-        AssertPairs(actual, new EmployeePair(employee1, employee2, days));
+    private static void AssertPair(IList<EmployeePair> actual, int employee1, int employee2, params (int ProjectId, int Days)[] projects) =>
+        AssertPairs(actual, Pair(employee1, employee2, projects));
 
-    // Pair order is not part of the contract, so compare ignoring order.
-    private static void AssertPairs(List<EmployeePair> actual, params EmployeePair[] expected) =>
+    // Pairs are expected ordered by employee IDs and projects by project ID.
+    private static void AssertPairs(IList<EmployeePair> actual, params string[] expected) =>
         Assert.Equal(
-            expected.OrderBy(p => p.Employee1).ThenBy(p => p.Employee2),
-            actual.OrderBy(p => p.Employee1).ThenBy(p => p.Employee2));
+            expected,
+            actual.Select(p => Describe(p.Employee1, p.Employee2, p.Days, p.Projects)));
+
+    // The expected total is the sum of the expected project days.
+    private static string Pair(int employee1, int employee2, params (int ProjectId, int Days)[] projects) =>
+        Describe(
+            employee1,
+            employee2,
+            projects.Sum(p => p.Days),
+            projects.Select(p => new ProjectOverlap(p.ProjectId, p.Days)));
+
+    private static string Describe(int employee1, int employee2, int days, IEnumerable<ProjectOverlap> projects) =>
+        $"{employee1}&{employee2}: {days} days [{string.Join(", ", projects.Select(p => $"project {p.ProjectId}: {p.Days}"))}]";
 }

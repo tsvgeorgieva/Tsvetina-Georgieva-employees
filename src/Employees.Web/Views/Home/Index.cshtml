@@ -53,12 +53,15 @@
             {
                 <table>
                     <thead>
-                        <tr><th>Employee ID #1</th><th>Employee ID #2</th><th>Days worked together</th></tr>
+                        <tr><th>Employee ID #1</th><th>Employee ID #2</th><th>Project ID</th><th>Days worked together</th></tr>
                     </thead>
                     <tbody>
                         @foreach (var pair in Model.Pairs)
                         {
-                            <tr><td>@pair.Employee1</td><td>@pair.Employee2</td><td>@pair.Days</td></tr>
+                            @foreach (var project in pair.Projects)
+                            {
+                                <tr><td>@pair.Employee1</td><td>@pair.Employee2</td><td>@project.ProjectId</td><td>@project.Days</td></tr>
+                            }
                         }
                     </tbody>
                 </table>
